@@ -39,7 +39,7 @@ public: std::string infixExpr ;
     char num = expr[pos]; 
   
    
-    if (operationPriority(num) == -1) 
+    if ((operationPriority(num) == -1) and (num != ' '))
 
     {
       strNumber += num; }
@@ -125,7 +125,7 @@ public: Expression(std::string expr)
  	return 0;   
 }
 	
-	double Calc() 
+	double Calc(float x, float y, float z) 
 { 
     std::vector<double> locals ;
     int cnt = 0; 
@@ -134,17 +134,17 @@ public: Expression(std::string expr)
     { 
         char c = postfixExpr[i]; 
      
-        if (operationPriority(c)<0) 
+        if ((operationPriority(c)<0) & ( c != ' '))
         { 
-            std::string number = GetStringNumber(postfixExpr,  i); 
-           double q=stof(number);
+            std::string number = GetStringNumber(postfixExpr,  i);
+            double q=stof(number);
             locals.push_back(q); 
+         
         } 
-        else if (operationPriority(c) > 0) 
-        { 
-           
-            cnt += 1; 
         
+        if (operationPriority(c) > 0) 
+        { 
+            cnt += 1; 
             if (c == '~') 
             { 
                 double last =  0; 
@@ -160,11 +160,13 @@ public: Expression(std::string expr)
            double second =  0; 
                 if (locals.size() > 0 ){
                 	second = *(locals.end()-1); 
+                	//std::cout<<locals.size()<<"GGG"; 
                 	locals.pop_back();
                 }
             double first =  0; 
                 if (locals.size() > 0 ){
                 	first = *(locals.end()-1); 
+                	//std::cout<<"KKK"<<std::endl; 
                 	locals.pop_back();
                 }
   
@@ -173,13 +175,13 @@ public: Expression(std::string expr)
     } 
    
     return *(locals.end()-1);
-}};
+}
+};
 int main(){
-	std::string expr = "(3+5)";
+	std::string expr = "(3+5)*2/5";
 	Expression  easy(expr);
 	std::cout<<"Input "<< expr<<std::endl;
 	std::cout << easy.postfixExpr<<std::endl;
-	std::cout << easy.Calc()<<std::endl;
+	std::cout << easy.Calc(0,0,0)<<std::endl;
 
 }
-
