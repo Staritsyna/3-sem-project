@@ -1,110 +1,68 @@
 #include "TFile.h"
 #include "TTree.h"
-//#include "TChain.h"
-#include "TH1.h"
-#include "TF1.h"
-#include "TLegend.h"
-#include "TGraphErrors.h"
-#include "TCanvas.h"
 
-#include <iostream> 
-#include <stdio.h>  
-#include <stdlib.h>
-#include <fstream>  
+#include <iostream>  
 #include <cstring>
-#include "math.h"
-
-/*class Function final {
-
-   public:
-   Function();
-   
-  // operator+;
-  // operator -;
-};
-Function function_def(std::string B){
-   Function res_fun();
-   for (int i = 0; i < B.length(); i++){
-   	if (B[i] == 'x' )  {
-   	 if (B[i+1] == '*' )  {
-   	 
-   	
-   	}
-   }
-   return res_fun();
+#include <vector>
 
 
 
-}}*/
-void input(){
+//const float e=1.602*pow(10,-19);
+//const float m_e=9.1*pow(10,-31);
 
-  float x_o;
-  float y_o;
-  float z_o;
+float B_x_P(float x, float y, float z){
 
-  float Vx_o;
-  float Vy_o;
-  float Vz_o;
-  
-  std::string B_x;
-  std::string B_y;
-  std::string B_z;
-
-  std::cout << "Enter the initial coordinates of  the particle (x, y, z)" << std::endl;
-  std::cin >> x_o >> y_o >> z_o ;
-  
-  std::cout << "Enter the initial velocity of  the particle (Vx, Vy, Vz)" << std::endl;
-  std::cin >> Vx_o >> Vy_o >> Vz_o;
-  
-  std::cout << "Enter a dependency B_x (x, y, z)" << std::endl;
-  std::cin >> B_x;
-  
-  std::cout << "Enter a dependency B_y (x, y, z)" << std::endl;
-  std::cin >> B_y;
-  
-  std::cout << "Enter a dependency B_z (x, y, z)" << std::endl;
-  std::cin >> B_z;
-
+	return 5;
 }
+float B_y_P(float x, float y, float z){
 
-void full(float x_o,float y_o,float z_o,float Vx_o, float Vy_o,float Vz_o, float m,float q){
-	float B_x=5;
-	float B_y=0;
-	float B_z=0;
-	float x=x_o;
-  	float y=y_o;
-  	float z=z_o;
-  	float t=0.1;
+	return 0;
+}
+float B_z_P(float x, float y, float z){
 
-  	float Vx=Vx_o;
-  	float Vy=Vy_o;
-  	float Vz=Vz_o;
-  	float a_x;
-  	float a_y;
-  	float a_z;
+	return 0;
+}
+void full(std::vector<float> co,std::vector<float> vo, std::vector<std::string> B_o ,float m,float q){
+        const int N_events = 2000;
+        const float t=0.001;
+
+  	std::vector<float> B{0,0,0};
+  	std::vector<float> c = co;
+  	std::vector<float> c_prev = co;
+  	std::vector<float> V = vo;
+  	std::vector<float> V_prev = vo;
+  	std::vector<float> a{0,0,0};
+  	
+
         std::unique_ptr<TFile> myFile( TFile::Open("file.root", "RECREATE") ); 
-        auto tree = std::make_unique<TTree>("tree", "The Tree Title"); 
- 
+        auto tree = std::make_unique<TTree>("trace_tree", "The Tree Title"); 
 
-        tree->Branch("coordinate x", &x); 
-        tree->Branch("coordinate y", &y); 
-        tree->Branch("coordinate z", &z); 
-        tree->Branch("Vx", &Vx); 
-        tree->Branch("Vy", &Vy); 
-        tree->Branch("Vz", &Vz); 
-        //tree->Branch("time", &t); 
-
- 
-for (int iEntry = 0; iEntry < 1000; ++iEntry) { 
-   a_x=q*(Vy*B_z-Vz*B_y)/m;
-   a_y=q*(Vz*B_x-Vx*B_z)/m;
-   a_z=q*(Vx*B_y-Vy*B_x)/m;
-   Vx+=t*a_x;
-   Vy+=t*a_y;
-   Vz+=t*a_z;
-   x+=(Vx*t+0.5*t*t*a_x);
-   y+=(Vy*t+0.5*t*t*a_y);
-   z+=(Vz*t+0.5*t*t*a_z);
+        tree->Branch("coordx", &c[0]); 
+        tree->Branch("coordy", &c[1]); 
+        tree->Branch("coordz", &c[2]); 
+        tree->Branch("Vx", &V[0]); 
+        tree->Branch("Vy", &V[1]); 
+        tree->Branch("Vz", &V[2]); 
+  
+ for (int iEntry = 0; iEntry < N_events ; ++iEntry) { 
+   B[0]=B_x_P(c_prev[0], c_prev[1], c_prev[2]);
+   B[1]=B_y_P(c_prev[0], c_prev[1], c_prev[2]);
+   B[2]=B_z_P(c_prev[0], c_prev[1], c_prev[2]);
+   a[0] = q*(V[1]*B[2]-V[2]*B[1])/m;
+   a[1] = q*(V[2]*B[0]-V[0]*B[2])/m;
+   a[2] = q*(V[0]*B[1]-V[1]*B[0])/m;
+   V[0] = V_prev[0]+t*a[0];
+   V[1] = V_prev[1]+t*a[1];
+   V[2] = V_prev[2]+t*a[2];
+   V_prev[0] = V[0];
+   V_prev[1] = V[1];
+   V_prev[2] = V[2];
+   c[0] = c_prev[0]+(V[0]*t+0.5*t*t*a[0]);
+   c[1] = c_prev[1]+(V[1]*t+0.5*t*t*a[1]);
+   c[2] = c_prev[2]+(V[2]*t+0.5*t*t*a[2]);
+   c_prev[0] = c[0];
+   c_prev[1] = c[1];
+   c_prev[2] = c[2];
    // Fill the current value of var into branch0 
    tree->Fill(); 
   
@@ -114,4 +72,36 @@ for (int iEntry = 0; iEntry < 1000; ++iEntry) {
 tree->Write();
 
 }
+
+void input(){
+  float m;
+  float q;
+
+  std::vector<float> coor{0,0,0};
+  std::vector<float> vel{0,0,0};
+  std::vector<std::string> B{"","",""};
+
+  std::cout << "Enter the mass of  the particle (in e mass)" << std::endl;
+  std::cin >> m ;
+  
+  std::cout << "Enter the charge of  the particle (in e charge)" << std::endl;
+  std::cin >> q ;
+  
+  std::cout << "Enter the initial coordinates of  the particle (x, y, z)" << std::endl;
+  std::cin >> coor[0] >> coor[1] >> coor[2] ;
+  
+  std::cout << "Enter the initial velocity of  the particle (Vx, Vy, Vz)" << std::endl;
+  std::cin >> vel[0] >> vel[1] >> vel[2] ;
+  
+  std::cout << "Enter a dependency B_x (x, y, z)" << std::endl;
+  std::cin >> B[0];
+  
+  std::cout << "Enter a dependency B_y (x, y, z)" << std::endl;
+  std::cin >> B[1];
+  
+  std::cout << "Enter a dependency B_z (x, y, z)" << std::endl;
+  std::cin >> B[2];
+full( coor, vel, B, m, q);
+}
+
 
