@@ -67,11 +67,20 @@ public: std::string infixExpr ;
        
       if (operationPriority(c) == -1) 
       { 
+        if (c == 'x'){
+        	postfixExpr += "x ";
+        }
+          else if (c == 'y'){
+        	postfixExpr += "y ";
+        }
+          else if (c == 'z'){
+        	postfixExpr += "z ";
+        }
+        else{
         std::string gs=GetStringNumber(infixExpr,  i); 
         postfixExpr += gs;
         postfixExpr +=" "; 
-   
-         
+         }
       } 
        
       else if (c == '(') 
@@ -136,10 +145,20 @@ public: Expression(std::string expr)
      
         if ((operationPriority(c)<0) & ( c != ' '))
         { 
+          if (c == 'x'){
+        	locals.push_back(x);
+        }
+          else if (c == 'y'){
+        	locals.push_back(y);
+        }
+          else if (c == 'z'){
+        	locals.push_back(z);
+        }
+          else {
             std::string number = GetStringNumber(postfixExpr,  i);
             double q=stof(number);
             locals.push_back(q); 
-         
+         }
         } 
         
         if (operationPriority(c) > 0) 
@@ -160,13 +179,11 @@ public: Expression(std::string expr)
            double second =  0; 
                 if (locals.size() > 0 ){
                 	second = *(locals.end()-1); 
-                	//std::cout<<locals.size()<<"GGG"; 
                 	locals.pop_back();
                 }
             double first =  0; 
                 if (locals.size() > 0 ){
-                	first = *(locals.end()-1); 
-                	//std::cout<<"KKK"<<std::endl; 
+                	first = *(locals.end()-1);  
                 	locals.pop_back();
                 }
   
@@ -177,11 +194,11 @@ public: Expression(std::string expr)
     return *(locals.end()-1);
 }
 };
-int main(){
-	std::string expr = "(3+5)*2/5";
+/*int main(){
+	std::string expr = "(x+y)^3";
 	Expression  easy(expr);
 	std::cout<<"Input "<< expr<<std::endl;
 	std::cout << easy.postfixExpr<<std::endl;
-	std::cout << easy.Calc(0,0,0)<<std::endl;
+	std::cout << easy.Calc(1,1,0)<<std::endl;
 
-}
+}*/
