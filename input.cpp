@@ -5,22 +5,25 @@
 #include <cstring>
 #include <vector>
 
+#include "read_exp.h"
+#include "input.h"
 
 
-//const float e=1.602*pow(10,-19);
-//const float m_e=9.1*pow(10,-31);
 
-float B_x_P(float x, float y, float z){
 
-	return 5;
+float B_x_P(float x, float y, float z, std::string B){
+	Expression Bx(B);
+	return Bx.Calc( x, y, z) ;
+	
 }
-float B_y_P(float x, float y, float z){
+float B_y_P(float x, float y, float z, std::string B){
 
-	return 0;
+	Expression By(B);
+	return By.Calc( x, y, z) ;
 }
-float B_z_P(float x, float y, float z){
-
-	return 0;
+float B_z_P(float x, float y, float z, std::string B){
+	Expression Bz(B);
+	return Bz.Calc( x, y, z) ;
 }
 void full(std::vector<float> co,std::vector<float> vo, std::vector<std::string> B_o ,float m,float q){
         const int N_events = 2000;
@@ -34,7 +37,7 @@ void full(std::vector<float> co,std::vector<float> vo, std::vector<std::string> 
   	std::vector<float> a{0,0,0};
   	
 
-        std::unique_ptr<TFile> myFile( TFile::Open("file.root", "RECREATE") ); 
+        std::unique_ptr<TFile> myFile( TFile::Open("/home/anna/project/file.root", "RECREATE") ); 
         auto tree = std::make_unique<TTree>("trace_tree", "The Tree Title"); 
 
         tree->Branch("coordx", &c[0]); 
@@ -45,9 +48,9 @@ void full(std::vector<float> co,std::vector<float> vo, std::vector<std::string> 
         tree->Branch("Vz", &V[2]); 
   
  for (int iEntry = 0; iEntry < N_events ; ++iEntry) { 
-   B[0]=B_x_P(c_prev[0], c_prev[1], c_prev[2]);
-   B[1]=B_y_P(c_prev[0], c_prev[1], c_prev[2]);
-   B[2]=B_z_P(c_prev[0], c_prev[1], c_prev[2]);
+   B[0]=B_x_P(c_prev[0], c_prev[1], c_prev[2], B_o[0]);
+   B[1]=B_y_P(c_prev[0], c_prev[1], c_prev[2],B_o[1]);
+   B[2]=B_z_P(c_prev[0], c_prev[1], c_prev[2],B_o[2]);
    a[0] = q*(V[1]*B[2]-V[2]*B[1])/m;
    a[1] = q*(V[2]*B[0]-V[0]*B[2])/m;
    a[2] = q*(V[0]*B[1]-V[1]*B[0])/m;
@@ -103,5 +106,6 @@ void input(){
   std::cin >> B[2];
 full( coor, vel, B, m, q);
 }
+
 
 
