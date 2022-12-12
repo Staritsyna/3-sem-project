@@ -1,10 +1,11 @@
 #include <iostream> 
 #include <vector> 
-#include <cstring>
+#include <string>
 #include "math.h"
- class Expression 
-{ 
-int operationPriority(char c){
+
+#include "read_exp.h"
+
+int Expression::operationPriority(char c){
    	if (c == '('){
 		return 0;
 		}
@@ -25,11 +26,8 @@ int operationPriority(char c){
 		return 4;
 		}
 	return -1;
-	}
-public: std::string infixExpr ;
-	 std::string postfixExpr;	
-
- private: std::string GetStringNumber(std::string expr,  int& pos) 
+}
+std::string Expression::GetStringNumber(std::string expr,  int& pos) 
 { 
   std::string strNumber = ""; 
  
@@ -53,7 +51,8 @@ public: std::string infixExpr ;
 
   return strNumber; 
 }	 
-	  std::string ToPostfix(std::string infixExpr) 
+
+std::string Expression::ToPostfix(std::string infixExpr) 
 { 
      
      postfixExpr = ""; 
@@ -119,13 +118,14 @@ public: std::string infixExpr ;
  }
     return postfixExpr; 
 }
-public: Expression(std::string expr) 
+
+Expression::Expression(std::string expr) 
     { 
         infixExpr = expr; 
         postfixExpr = ToPostfix(infixExpr ); 
     } 
     
-   double Execute(char op, double first, double second) { 
+double Expression::Execute(char op, double first, double second) { 
  	if (op == '+'){ return first+second;}
  	if (op == '-'){ return first-second;}
  	if (op == '*'){ return first*second;}
@@ -134,7 +134,7 @@ public: Expression(std::string expr)
  	return 0;   
 }
 	
-	double Calc(float x, float y, float z) 
+double Expression::Calc(float x, float y, float z) 
 { 
     std::vector<double> locals ;
     int cnt = 0; 
@@ -193,12 +193,3 @@ public: Expression(std::string expr)
    
     return *(locals.end()-1);
 }
-};
-/*int main(){
-	std::string expr = "(x+y)^3";
-	Expression  easy(expr);
-	std::cout<<"Input "<< expr<<std::endl;
-	std::cout << easy.postfixExpr<<std::endl;
-	std::cout << easy.Calc(1,1,0)<<std::endl;
-
-}*/
