@@ -126,11 +126,22 @@ Expression::Expression(std::string expr)
     } 
     
 double Expression::Execute(char op, double first, double second) { 
- 	if (op == '+'){ return first+second;}
- 	if (op == '-'){ return first-second;}
- 	if (op == '*'){ return first*second;}
- 	if (op == '/'){ return first/second;}
- 	if (op == '^'){ return pow(first, second);}
+ 	if (op == '+'){ 
+ 		return first+second;
+ 		}
+ 	if (op == '-'){ 
+ 		return first-second;
+ 		}
+ 	if (op == '*'){ 
+ 		return first*second;
+ 		}
+ 	if (op == '/'){ 
+ 		if ( second == 0) throw std::string ("division by zero");
+ 		return first/second;
+ 		}
+ 	if (op == '^'){ 
+ 		return pow(first, second);
+ 		}
  	return 0;   
 }
 	
