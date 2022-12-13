@@ -8,16 +8,11 @@
 #include "read_exp.h"
 #include "input.h"
 
-
-
-
 float B_x_P(float x, float y, float z, std::string B){
 	Expression Bx(B);
 	return Bx.Calc( x, y, z) ;
-	
 }
 float B_y_P(float x, float y, float z, std::string B){
-
 	Expression By(B);
 	return By.Calc( x, y, z) ;
 }
@@ -25,76 +20,90 @@ float B_z_P(float x, float y, float z, std::string B){
 	Expression Bz(B);
 	return Bz.Calc( x, y, z) ;
 }
-void full(std::vector<float> co,std::vector<float> vo, std::vector<std::string> B_o ,float m,float q){
-        const int N_events = 2000;
+
+void partB(std::vector<float>& B,std::vector<float> c1,std::vector<float> c2,std::vector<float> v,float q){
+	std::vector<float> r(3,0);
+	r[0] = c1[0]-c2[0];
+	r[1] = c1[1]-c2[1];
+	r[2] = c1[2]-c2[2];
+	float dist = sqrt(r[0]*r[0]+r[1]*r[1]+r[2]*r[2]);
+	//if ( dist == 0) throw std::string ("division by zero");
+		
+	B[0] += q*(v[1]*r[2]-v[2]*r[1])/(4*3.1416*pow(dist,3));
+	B[1] += q*(v[2]*r[0]-v[0]*r[2])/(4*3.1416*pow(dist,3));
+	B[2] += q*(v[0]*r[1]-v[1]*r[0])/(4*3.1416*pow(dist,3));
+
+}
+void full(int n,  std::vector<std::vector<float>> co, std::vector<std::vector<float>> vo, std::vector<std::string> B_o ,std::vector<float> m,std::vector<float> q){
+        const int nEvents = 2000;
         const float t=0.001;
 
   	std::vector<float> B{0,0,0};
-  	std::vector<float> c = co;
-  	std::vector<float> c_prev = co;
-  	std::vector<float> V = vo;
-  	std::vector<float> V_prev = vo;
-  	std::vector<float> a{0,0,0};
+  	std::vector<std::vector<float>> c = co;
+  	std::vector<std::vector<float>> c_prev = co;
+  	std::vector<std::vector<float>> V = vo;
+  	std::vector<std::vector<float>> V_prev = vo;
   	
+  	std::vector<std::vector<float>> a(n,{0,0,0});
+  	
+ 	
+	std::unique_ptr<TFile> myFile( TFile::Open("/home/anna/project/fileTrace.root", "RECREATE") ); 
+	auto tree = std::make_unique<TTree>("tree", "tree"); 
 
-        std::unique_ptr<TFile> myFile( TFile::Open("/home/anna/project/file.root", "RECREATE") ); 
-        auto tree = std::make_unique<TTree>("trace_tree", "The Tree Title"); 
-
-        tree->Branch("coordx", &c[0]); 
-        tree->Branch("coordy", &c[1]); 
-        tree->Branch("coordz", &c[2]); 
-        tree->Branch("Vx", &V[0]); 
-        tree->Branch("Vy", &V[1]); 
-        tree->Branch("Vz", &V[2]); 
-  
- for (int iEntry = 0; iEntry < N_events ; ++iEntry) { 
-   B[0]=B_x_P(c_prev[0], c_prev[1], c_prev[2], B_o[0]);
-   B[1]=B_y_P(c_prev[0], c_prev[1], c_prev[2],B_o[1]);
-   B[2]=B_z_P(c_prev[0], c_prev[1], c_prev[2],B_o[2]);
-   a[0] = q*(V[1]*B[2]-V[2]*B[1])/m;
-   a[1] = q*(V[2]*B[0]-V[0]*B[2])/m;
-   a[2] = q*(V[0]*B[1]-V[1]*B[0])/m;
-   V[0] = V_prev[0]+t*a[0];
-   V[1] = V_prev[1]+t*a[1];
-   V[2] = V_prev[2]+t*a[2];
-   V_prev[0] = V[0];
-   V_prev[1] = V[1];
-   V_prev[2] = V[2];
-   c[0] = c_prev[0]+(V[0]*t+0.5*t*t*a[0]);
-   c[1] = c_prev[1]+(V[1]*t+0.5*t*t*a[1]);
-   c[2] = c_prev[2]+(V[2]*t+0.5*t*t*a[2]);
-   c_prev[0] = c[0];
-   c_prev[1] = c[1];
-   c_prev[2] = c[2];
-   // Fill the current value of var into branch0 
-   tree->Fill(); 
-  
-} 
- 
-// Now write the header 
+	for (int i = 0; i < n; i++){
+        	char brnch[120];
+		sprintf(brnch,"coordx%d",i);
+        	tree->Branch(brnch, &c[i][1]);
+        	sprintf(brnch,"coordy%d",i);
+        	tree->Branch(brnch, &c[i][1]);
+        	sprintf(brnch,"coordz%d",i); 
+        	tree->Branch(brnch, &c[i][2]); 
+        	sprintf(brnch,"Vx%d",i);
+        	tree->Branch(brnch, &V[i][0]); 
+        	sprintf(brnch,"Vy%d",i);
+        	tree->Branch(brnch, &V[i][1]); 
+        	sprintf(brnch,"Vz%d",i);
+        	tree->Branch(brnch, &V[i][2]);
+	}
+  	for (int k = 0; k < nEvents; k++){
+  	     for (int i = 0; i < n; i++){
+		
+   		B[0]=B_x_P(c_prev[i][0], c_prev[i][1], c_prev[i][2], B_o[0]);
+   		B[1]=B_y_P(c_prev[i][0], c_prev[i][1], c_prev[i][2],B_o[1]);
+		B[2]=B_z_P(c_prev[i][0], c_prev[i][1], c_prev[i][2],B_o[2]);
+		for (int m = 0; m < n; m++){
+			if (m != i){
+				partB(B, c_prev[i],c_prev[m], V_prev[m], q[i]);
+				}
+			}
+		a[i][0] = q[i]*(V[i][1]*B[2]-V[i][2]*B[1])/m[i];
+		a[i][1] = q[i]*(V[i][2]*B[0]-V[i][0]*B[2])/m[i];
+		a[i][2] = q[i]*(V[i][0]*B[1]-V[i][1]*B[0])/m[i];
+		V[i][0] = V_prev[i][0]+t*a[i][0];
+		V[i][1] = V_prev[i][1]+t*a[i][1];
+		V[i][2] = V_prev[i][2]+t*a[i][2];
+		V_prev[i][0] = V[i][0];
+		V_prev[i][1] = V[i][1];
+		V_prev[i][2] = V[i][2];
+		c[i][0] = c_prev[i][0]+(V[i][0]*t+0.5*t*t*a[i][0]);
+		c[i][1] = c_prev[i][1]+(V[i][1]*t+0.5*t*t*a[i][1]);
+		c[i][2] = c_prev[i][2]+(V[i][2]*t+0.5*t*t*a[i][2]);
+		c_prev[i][0] = c[i][0];
+		c_prev[i][1] = c[i][1];
+		c_prev[i][2] = c[i][2];
+		} 
+		
+		tree->Fill(); 
+	}
 tree->Write();
-
 }
 
-void input(){
-  float m;
-  float q;
+void input(int np){
 
-  std::vector<float> coor{0,0,0};
-  std::vector<float> vel{0,0,0};
+
+  std::vector<std::vector<float>> coord;
+  std::vector<std::vector<float>> vel;
   std::vector<std::string> B{"","",""};
-
-  std::cout << "Enter the mass of  the particle (in e mass)" << std::endl;
-  std::cin >> m ;
-  
-  std::cout << "Enter the charge of  the particle (in e charge)" << std::endl;
-  std::cin >> q ;
-  
-  std::cout << "Enter the initial coordinates of  the particle (x, y, z)" << std::endl;
-  std::cin >> coor[0] >> coor[1] >> coor[2] ;
-  
-  std::cout << "Enter the initial velocity of  the particle (Vx, Vy, Vz)" << std::endl;
-  std::cin >> vel[0] >> vel[1] >> vel[2] ;
   
   std::cout << "Enter a dependency B_x (x, y, z)" << std::endl;
   std::cin >> B[0];
@@ -104,8 +113,37 @@ void input(){
   
   std::cout << "Enter a dependency B_z (x, y, z)" << std::endl;
   std::cin >> B[2];
-full( coor, vel, B, m, q);
+ 
+  std::vector<float> m (np,0);
+  std::vector<float> q (np,0);
+  for (int i=0; i < np; i++){
+  	std::vector<float> coor1;
+  	std::vector<float> vel1;
+  	for (int i=0; i < 3; i++){
+  		coor1.push_back(0);
+  		vel1.push_back(0);
+  	}
+  	coord.push_back(coor1);
+  	vel.push_back(vel1);
+  }
+  for (int i = 0; i < np; i++){
+  std::cout <<  "Enter the mass of  the "<< i+1<< " particle (in e mass)" << std::endl;
+  std::cin >> m[i] ;
+  
+  std::cout << "Enter the charge of  the particle (in e charge)" << std::endl;
+  std::cin >> q[i] ;
+  
+  std::cout << "Enter the initial coordinates of  the particle (x, y, z)" << std::endl;
+  std::cin >> coord[i][0] >> coord[i][1] >> coord[i][2] ;
+  
+  std::cout << "Enter the initial velocity of  the particle (Vx, Vy, Vz)" << std::endl;
+  std::cin >> vel[i][0] >> vel[i][1] >> vel[i][2] ;
+  
+  }  
+   full( np,coord, vel, B, m, q);
 }
+
+
 
 
 
