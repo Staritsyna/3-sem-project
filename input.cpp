@@ -27,11 +27,25 @@ void partB(std::vector<float>& B,std::vector<float> c1,std::vector<float> c2,std
 	r[1] = c1[1]-c2[1];
 	r[2] = c1[2]-c2[2];
 	float dist = sqrt(r[0]*r[0]+r[1]*r[1]+r[2]*r[2]);
-	//if ( dist == 0) throw std::string ("division by zero");
+	if ( dist == 0) throw std::string ("division by zero");
 		
-	B[0] += q*(v[1]*r[2]-v[2]*r[1])/(4*3.1416*pow(dist,3));
-	B[1] += q*(v[2]*r[0]-v[0]*r[2])/(4*3.1416*pow(dist,3));
-	B[2] += q*(v[0]*r[1]-v[1]*r[0])/(4*3.1416*pow(dist,3));
+	B[0] += pow(10,-26)*1.6*q*(v[1]*r[2]-v[2]*r[1])/(pow(dist,3));
+	B[1] += pow(10,-26)*1.6*q*(v[2]*r[0]-v[0]*r[2])/(pow(dist,3));
+	B[2] += pow(10,-26)*1.6*q*(v[0]*r[1]-v[1]*r[0])/(pow(dist,3));
+
+}
+
+void El(int i,std::vector<float>& a,std::vector<float> c1,std::vector<float> c2,float q1,float q2,float m){
+	std::vector<float> r(3,0);
+	r[0] = c1[0]-c2[0];
+	r[1] = c1[1]-c2[1];
+	r[2] = c1[2]-c2[2];
+	float dist = sqrt(r[0]*r[0]+r[1]*r[1]+r[2]*r[2]);
+	if ( dist == 0) throw std::string ("division by zero");
+		
+	a[0] += 1.6*1.6*9*100*q1*q2*r[0]/(9.1*m*pow(dist,3));
+	a[1] += 1.6*1.6*9*100*q1*q2*r[1]/(9.1*m*pow(dist,3));
+	a[2] += 1.6*1.6*9*100*q1*q2*r[2]/(9.1*m*pow(dist,3));
 
 }
 void full(int n,  std::vector<std::vector<float>> co, std::vector<std::vector<float>> vo, std::vector<std::string> B_o ,std::vector<float> m,std::vector<float> q){
@@ -71,14 +85,15 @@ void full(int n,  std::vector<std::vector<float>> co, std::vector<std::vector<fl
    		B[0]=B_x_P(c_prev[i][0], c_prev[i][1], c_prev[i][2], B_o[0]);
    		B[1]=B_y_P(c_prev[i][0], c_prev[i][1], c_prev[i][2],B_o[1]);
 		B[2]=B_z_P(c_prev[i][0], c_prev[i][1], c_prev[i][2],B_o[2]);
-		for (int m = 0; m < n; m++){
-			if (m != i){
-				partB(B, c_prev[i],c_prev[m], V_prev[m], q[i]);
+		for (int m0 = 0; m0 < n; m0++){
+			if (m0 != i){
+				partB(B, c_prev[i],c_prev[m0], V_prev[m0], q[i]);
+				El(i,a[i],c_prev[i],c_prev[m0], q[i],q[m0], m[i]);
 				}
 			}
-		a[i][0] = q[i]*(V[i][1]*B[2]-V[i][2]*B[1])/m[i];
-		a[i][1] = q[i]*(V[i][2]*B[0]-V[i][0]*B[2])/m[i];
-		a[i][2] = q[i]*(V[i][0]*B[1]-V[i][1]*B[0])/m[i];
+		a[i][0] += 1.6*pow(10,12)*q[i]*(V[i][1]*B[2]-V[i][2]*B[1])/(9.1*m[i]);
+		a[i][1] += 1.6*pow(10,12)*q[i]*(V[i][2]*B[0]-V[i][0]*B[2])/(9.1*m[i]);
+		a[i][2] += 1.6*pow(10,12)*q[i]*(V[i][0]*B[1]-V[i][1]*B[0])/(9.1*m[i]);
 		V[i][0] = V_prev[i][0]+t*a[i][0];
 		V[i][1] = V_prev[i][1]+t*a[i][1];
 		V[i][2] = V_prev[i][2]+t*a[i][2];
