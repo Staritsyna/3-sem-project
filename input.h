@@ -5,15 +5,13 @@
 #include <string>
 #include <vector>
 
-float B_x_P(float x, float y, float z, std::string B);
-float B_y_P(float x, float y, float z, std::string B);
-float B_z_P(float x, float y, float z, std::string B);
+double B_P(double x, double y, double z, std::string B);
 
-void partB(std::vector<float>& B,std::vector<float> c1,std::vector<float> c2,std::vector<float> v,float q);
-void El(int i,std::vector<float>& a,std::vector<float> c1,std::vector<float> c2,float q1,float q2,float m);
+void partB(std::vector<double>& B,std::vector<double> c1,std::vector<double> c2,std::vector<double> v,double q);
+void El(std::vector<double>& a,std::vector<double> c1,std::vector<double> c2,double q1,double q2,double m);
 
-void full(int n,  std::vector<std::vector<float>> co, std::vector<std::vector<float>> vo,
- std::vector<std::string> B_o ,std::vector<float> m,std::vector<float> q);
+void full(int n,  std::vector<std::vector<double>> co, std::vector<std::vector<double>> vo,
+ std::vector<std::string> B_o ,std::vector<double> m,std::vector<double> q);
 void input(int np);
 
 #endif
