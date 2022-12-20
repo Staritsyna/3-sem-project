@@ -15,22 +15,26 @@
 
 #include "plot_trace.h"
 
-
+//drawing the plot ( n - number of particles)
 void plot_trace3D(int n){
-	const int nEvents = 2000;
+
+	const int nPoints = 10000;
 	
-	TCanvas *c00 = new TCanvas("c00","Graph2D example",0,0,600,600);
+	TCanvas *c00 = new TCanvas("c00","Graph2D ",0,0,600,600);
 	TGraph2D *dt = new TGraph2D(); 
 	
-	std::vector<float>  cx(n,0);
-  	std::vector<float>  cy(n,0);
-  	std::vector<float>  cz(n,0);
-  	std::vector<float> coorx;
-  	std::vector<float> coory;
-  	std::vector<float> coorz;
+	std::vector<double>  cx(n,0);
+  	std::vector<double>  cy(n,0);
+  	std::vector<double>  cz(n,0);
+  	std::vector<double> coorx;
+  	std::vector<double> coory;
+  	std::vector<double> coorz;
   	
+  	//opent the file "fileTrace.root"
 	std::unique_ptr<TFile> myFile( TFile::Open("/home/anna/project/fileTrace.root") ); 
 	auto tree = myFile->Get<TTree>("tree"); 
+	
+	//reading and filling vectors
 	for (int i = 0; i < n; i++){
         	char brnch[120];
 		sprintf(brnch,"coordx%d",i);
@@ -50,6 +54,7 @@ void plot_trace3D(int n){
 		for (int iEntry = 0; tree->LoadTree(iEntry) >= 0; ++iEntry) { 
    			tree->GetEntry(iEntry); 
  			coorx.push_back(cx[i]);
+ 		
  			
 		}
 		sprintf(brnch,"coordy%d",i);
@@ -70,17 +75,18 @@ void plot_trace3D(int n){
 		}
   	}
    		c00->cd();
-   		dt->SetTitle("Trace; X ; Y ; Z "); 
+   		dt->SetTitle("Trace; X*10^-5; Y*10^-5 ; Z*10^-5 "); 
   
    		
 
-   	for (Int_t i=0; i< nEvents*n; i++) {
+   	for (Int_t i=0; i< nPoints*n; i++) {
       			dt->SetPoint(i,coorx[i], coory[i],coorz[i]);
-   		}
+   	}
         gStyle->SetPalette(1); 
         dt->Draw("P0"); 
         gSystem->ProcessEvents(); 
- 
+ 	
+ 	//save the picture
         TImage *img = TImage::Create(); 
   
         img->FromPad(c00); 
