@@ -4,7 +4,8 @@
 #include "math.h"
 
 #include "read_exp.h"
-
+// Expression - class, which calculates the value of Nagnetic fielld B in each point
+//define priority of operation
 int Expression::operationPriority(char c){
    	if (c == '('){
 		return 0;
@@ -27,31 +28,22 @@ int Expression::operationPriority(char c){
 		}
 	return -1;
 }
-std::string Expression::GetStringNumber(std::string expr,  int& pos) 
-{ 
+
+std::string Expression::GetStringNumber(std::string expr,  int& pos){ 
   std::string strNumber = ""; 
- 
-  for (; pos < expr.length(); pos++) 
-  { 
-
+  for (; pos < expr.length(); pos++){ 
     char num = expr[pos]; 
-  
-   
-    if ((operationPriority(num) == -1) and (num != ' '))
-
-    {
+    if ((operationPriority(num) == -1) and (num != ' ')){
       strNumber += num; }
-    else 
-    { 
+    else { 
       pos--; 
       break; 
     }
-   
   } 
-
   return strNumber; 
 }	 
 
+//brings string to postfix for
 std::string Expression::ToPostfix(std::string infixExpr) 
 { 
      
@@ -124,7 +116,8 @@ Expression::Expression(std::string expr)
         infixExpr = expr; 
         postfixExpr = ToPostfix(infixExpr ); 
     } 
-    
+
+//calculates result of 1 step   
 double Expression::Execute(char op, double first, double second) { 
  	if (op == '+'){ 
  		return first+second;
@@ -144,18 +137,14 @@ double Expression::Execute(char op, double first, double second) {
  		}
  	return 0;   
 }
-	
-double Expression::Calc(float x, float y, float z) 
-{ 
+//calculates the value of expression in the point (x,y,z)	
+double Expression::Calc(double x, double y, double z) { 
     std::vector<double> locals ;
     int cnt = 0; 
-
-    for (int i = 0; i < postfixExpr.length(); i++) 
-    { 
+    for (int i = 0; i < postfixExpr.length(); i++) { 
         char c = postfixExpr[i]; 
      
-        if ((operationPriority(c)<0) & ( c != ' '))
-        { 
+        if ((operationPriority(c)<0) & ( c != ' ')){ 
           if (c == 'x'){
         	locals.push_back(x);
         }
@@ -172,8 +161,7 @@ double Expression::Calc(float x, float y, float z)
          }
         } 
         
-        if (operationPriority(c) > 0) 
-        { 
+        if (operationPriority(c) > 0) { 
             cnt += 1; 
             if (c == '~') 
             { 
@@ -183,7 +171,6 @@ double Expression::Calc(float x, float y, float z)
                 	locals.pop_back();
                 }
                 locals.push_back(Execute('-', 0, last)); 
-               
                 continue; 
             } 
        
