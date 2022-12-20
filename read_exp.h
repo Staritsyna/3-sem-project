@@ -3,14 +3,14 @@
 
 #include <string>
 
-class Expression 
+class Expression // calculates B from expression
 { 
 public:
 	std::string infixExpr ;
 	std::string postfixExpr;
 	Expression(std::string expr);
 	double Execute(char op, double first, double second);
-	double Calc(float x, float y, float z);
+	double Calc(double x, double y, double z);
 	
 private:
 	int operationPriority(char c);
